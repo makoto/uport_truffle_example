@@ -41,7 +41,7 @@ window.App = {
 
       accounts = accs;
       account = accounts[0];
-
+      self.getCredential();
       self.refreshBalance();
     });
   },
@@ -65,6 +65,14 @@ window.App = {
       console.log(e);
       self.setStatus("Error getting balance; see log.");
     });
+  },
+
+  getCredential: function(){
+    uport.requestCredentials().then((credentials) => {
+      var status = document.getElementById("user");
+      console.log(credentials)
+      status.innerHTML = credentials.name;
+    }, console.err)
   },
 
   sendCoin: function() {
