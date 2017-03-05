@@ -11,7 +11,7 @@ import metacoin_artifacts from '../../build/contracts/MetaCoin.json'
 var MetaCoin = contract(metacoin_artifacts);
 import { Connect } from 'uport-connect'
 let uport = new Connect('MetaCoin')
-
+let address;
 // The following code is simple to show off interacting with your contracts.
 // As your needs grow you will likely need to change its form and structure.
 // For application bootstrapping, check out window.addEventListener below.
@@ -75,17 +75,23 @@ window.App = {
 
     this.setStatus("Initiating transaction... (please wait)");
 
+    let statusAbi = metacoin_artifacts.abi;
+    let statusContract = web3.eth.contract(statusAbi)
+    let statusFunction = statusContract.at(address);
     var meta;
-    MetaCoin.deployed().then(function(instance) {
-      meta = instance;
-      return meta.sendCoin(receiver, amount, {from: account});
-    }).then(function() {
-      self.setStatus("Transaction complete!");
-      self.refreshBalance();
-    }).catch(function(e) {
-      console.log(e);
-      self.setStatus("Error sending coin; see log.");
-    });
+
+    statusFunction.sendCoin(receiver, amount, function(error, txhash) {
+      console.log('txhash', txhash);
+      console.log('error', error);
+      MetaCoin.deployed().then(function(instance) {
+        meta = instance;
+        self.setStatus("Transaction complete!");
+        self.refreshBalance();
+      }).catch(function(e) {
+        console.log(e);
+        self.setStatus("Error sending coin; see log.");
+      });
+    })
   }
 };
 
@@ -103,3 +109,11 @@ window.addEventListener('load', function() {
 
   App.start();
 });
+
+// Run the following from truffle console
+// Transfer some coin from contract owner to
+// owner = web3.eth.accounts[0]; /* this is the address you deployed your contract */
+// account = '0xbcc47523c230b1781d827853670c5b89467a0581'; /* this is your uport address; */
+// MetaCoin.deployed().then(function(instance) { return instance.sendCoin(account, 10, {from:owner})}).then(function(c){console.log(c)})
+// MetaCoin.deployed().then(function(instance) { return instance.getBalance.call(account)}).then(function(c){console.log(c.toNumber())})
+// MetaCoin.deployed().then(function(instance) { return instance.getBalance.call(owner)}).then(function(c){console.log(c.toNumber())})
