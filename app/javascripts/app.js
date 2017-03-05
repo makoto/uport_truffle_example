@@ -89,16 +89,12 @@ window.App = {
     var meta;
 
     statusFunction.sendCoin(receiver, amount, function(error, txhash) {
-      console.log('txhash', txhash);
-      console.log('error', error);
-      MetaCoin.deployed().then(function(instance) {
-        meta = instance;
+      if (error) {
+        self.setStatus(error);
+      }else{
         self.setStatus("Transaction complete!");
         self.refreshBalance();
-      }).catch(function(e) {
-        console.log(e);
-        self.setStatus("Error sending coin; see log.");
-      });
+      }
     })
   }
 };
